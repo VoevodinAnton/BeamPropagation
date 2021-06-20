@@ -14,6 +14,23 @@ def gauss1Dp(rho, sigma):
     return np.exp(-rho ** 2 / sigma ** 2)
 
 
+def gauss_laguerre(rho, sigma, n, m):
+    t = (rho ** 2) / (sigma ** 2)
+    Term1 = (np.sqrt(2) * rho / sigma) ** np.abs(m)
+    Term2 = special.assoc_laguerre(2 * t, n, np.abs(m))
+    Term3 = np.exp(-t)
+    return Term1 * Term2 * Term3
+
+
+def gauss_bessel(rho, sigma, m):
+    k, alpha = constants()
+    kr = alpha * np.sin(0.3)
+    t = (rho ** 2) / (sigma ** 2)
+    Term1 = special.jv(m, kr * rho)
+    Term2 = np.exp(-t)
+    return Term1 * Term2
+
+
 def gauss2D(x, y, sigma):
     if len(x) != len(y):
         print("x и y не равны")
@@ -68,26 +85,26 @@ def constants():
 #     integral = ker * f.transpose() * h
 # return term2 * radial_function(term1 * term3 * term4 * integral, m)
 
-def ker(rho, sigma, r, m, p):
+def ker(rho, sigma, r, n, m, p):
     k, alpha = constants()
-    return gauss1Dp(rho, sigma) * np.exp(
-        1j * k * alpha / (2 * np.tan(p)) * (rho ** 2)) * special.jv(m,
-                                                                    k * alpha * rho * r / np.sin(
-                                                                        p)) * rho
+    return gauss_laguerre(rho, sigma, n, m) * np.exp(
+        1j * k * alpha * (rho ** 2) / (2 * np.tan(p))) * special.jv(m,
+                                                                 k * alpha * rho * r / np.sin(
+                                                                     p)) * rho
 
 
-def function_integral(sigma, r, m, p):
-    return integrate.quad(ker, 0, 0.001, args=(sigma, r, m, p))[0]
+def function_integral(sigma, r, n, m, p):
+    return integrate.quad(ker, 0, 0.0001, args=(sigma, r, n, m, p))[0]
 
 
-def fractional_fft_polar(r, phi, z, m, sigma):
+def fractional_fft_polar(r, phi, z, n, m, sigma):
     k, alpha = constants()
     p = alpha * z
-    term1 = 1j * k * alpha / np.sin(p)
+    term1 = -1j * k * alpha / np.sin(p)
     term2 = np.exp(1j * k * z)
     term3 = np.exp(1j * k * alpha / (2 * np.tan(p)) * r ** 2)
     term4 = 1j ** (-m)
     term5 = np.exp(1j * m * phi)
     integral_vec = np.vectorize(function_integral)
     g = np.exp(-r ** 2 / sigma ** 2)
-    return term5 * term4 * term3 * term2 * term1 * integral_vec(sigma, r, m, p)
+    return term5 * term4 * term3 * term2 * term1 * integral_vec(sigma, r, n, m, p)
