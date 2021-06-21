@@ -1,52 +1,33 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import gauss1D
+import utils
 
 if __name__ == '__main__':
-    # x = np.arange(0, 2 * np.pi, 0.01)
-    # y = np.arange(-2 * np.pi, 2 * np.pi, 0.01)
-    # xx, yy = np.meshgrid(x, y)
-    # z = gauss1D.gauss2D(xx, yy, 3)
-    # h = plt.contourf(x, y, z)
-    # plt.colorbar()
-    # xxx = gauss1D.gauss1D(x, 3)
-    # F = gauss1D.radial_function(xxx, 3)
-    # gauss1D.plot_radial_function(F)
-
-    # f = gauss1D.gauss1D(x, 3)
-    # phi =np.linspace(0, 2 * np.pi, 32)
-    # sigma = 3
-    # z = 3
-    # ffft = gauss1D.fractional_fft_polar(f, x, phi, z, 2, sigma)
-
-    fig = plt.figure()
-
-    ax = fig.add_subplot(projection='3d')
-
-    # Create the mesh in polar coordinates and compute corresponding Z.
+    # parameters
     lambda_ = 633 * 10 ** (-9)
-    r = np.linspace(0, 10 * lambda_, 200)
-    p = np.linspace(0, 2 * np.pi, 200)
-    R, P = np.meshgrid(r, p)
-
     z = 15 * lambda_
-    m = 2
-    n = 4
+    m = 1
+    n = 0
     sigma = 2 * lambda_
 
-    Z = np.abs(gauss1D.fractional_fft_polar(R, P, z, n, m, sigma))
-    print(Z)
+    # Create the mesh in polar coordinates and compute corresponding Z.
+
+    r = np.linspace(0, 10 * lambda_, 300)
+    p = np.linspace(0, 2 * np.pi, 300)
+    R, P = np.meshgrid(r, p)
+
+    Z = utils.fractional_fft_polar(R, P, z, n, m, sigma) + utils.fractional_fft_polar(R, P, z, 0, 7, sigma)
 
     # Express the mesh in the cartesian system.
-    X, Y = R * np.cos(P), R * np.sin(P)
+    X, Y = utils.pol2cart(R, P)
 
-    # Plot the surface.
-    ax.plot_surface(X, Y, Z, cmap=plt.cm.YlGnBu_r)
+    utils.build_contourf(X, Y, Z)
 
-    # Tweak the limits and add latex math labels.
-    ax.set_zlim(0, 35)
-    ax.set_xlabel(r'$\phi_\mathrm{real}$')
-    ax.set_ylabel(r'$\phi_\mathrm{im}$')
-    ax.set_zlabel(r'$V(\phi)$')
-
-    plt.show()
+    # x = np.linspace(-10*lambda_, 10 * lambda_, 150)
+    # y = np.linspace(-10*lambda_, 10 * lambda_, 150)
+    # X1, Y1 = np.meshgrid(x, y)
+    # Z0 = utils.gauss2D(X1, Y1, sigma)
+    # utils.build_surf(X1, Y1, Z0)
+    # Z1 = np.abs(utils.fractional_fft_cartesian(X1, Y1, z, sigma, m))
+    # print(Z1)
+    # utils.build_surf(X1, Y1, Z1)
