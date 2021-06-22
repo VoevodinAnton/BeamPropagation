@@ -5,10 +5,18 @@ import utils
 if __name__ == '__main__':
     # parameters
     lambda_ = 633 * 10 ** (-9)
-    z = 15 * lambda_
-    m = 1
-    n = 0
-    sigma = 2 * lambda_
+    z = 250 * lambda_
+    n1 = 0
+    m1 = 2
+    sigma1 = 3 * lambda_
+
+    n2 = 0
+    m2 = 5
+    sigma2 = 2 * lambda_
+
+    n3 = 0
+    m3 = 7
+    sigma3 = lambda_
 
     # Create the mesh in polar coordinates and compute corresponding Z.
 
@@ -16,7 +24,11 @@ if __name__ == '__main__':
     p = np.linspace(0, 2 * np.pi, 300)
     R, P = np.meshgrid(r, p)
 
-    Z = utils.fractional_fft_polar(R, P, z, n, m, sigma) + utils.fractional_fft_polar(R, P, z, 0, 7, sigma)
+    mode1 = utils.fractional_fft_polar(R, P, z, n1, m1, sigma1)
+    mode2 = utils.fractional_fft_polar(R, P, z, n2, m2, sigma2)
+    mode3 = utils.fractional_fft_polar(R, P, z, n3, m3, sigma3)
+
+    Z = mode1
 
     # Express the mesh in the cartesian system.
     X, Y = utils.pol2cart(R, P)

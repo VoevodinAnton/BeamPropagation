@@ -84,8 +84,8 @@ def ker_polar(rho, sigma, r, n, m, p):
     k, alpha = constants()
     a = 0.0005
     beta = k * a
-    term0 = np.sin((beta * rho) ** 2)
-    term1 = gauss_laguerre(rho, sigma, n, m)
+    term0 = np.sin((beta * rho) ** 3)
+    term1 = gauss1D(rho, sigma)
     term2 = np.exp(1j * k * alpha * (rho ** 2) / (2 * np.tan(p)))
     term3 = special.jv(m, k * alpha * rho * r / np.sin(p)) * rho
     return term1 * term2 * term3
