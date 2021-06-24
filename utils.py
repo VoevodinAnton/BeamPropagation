@@ -82,17 +82,20 @@ def fractional_fft_polar_radial(f, r, m):
 
 def ker_polar(rho, sigma, r, n, m, p):
     k, alpha = constants()
-    a = 0.0005
+    a = 0.0018
     beta = k * a
-    term0 = np.sin((beta * rho) ** 3)
-    term1 = gauss1D(rho, sigma)
+    term0 = np.sin((beta * (rho - 2 * 10 ** (-3))) ** (4 / 3))
+    term1 = gauss_laguerre(rho, sigma, n, m)
     term2 = np.exp(1j * k * alpha * (rho ** 2) / (2 * np.tan(p)))
     term3 = special.jv(m, k * alpha * rho * r / np.sin(p)) * rho
     return term1 * term2 * term3
 
 
 def function_integral_polar(sigma, r, n, m, p):
-    return integrate.quad(ker_polar, 0, 0.00001, args=(sigma, r, n, m, p))[0]
+    integral = integrate.quad(ker_polar, 0, 0.0001, args=(sigma, r, n, m, p))
+    print("погрешность интегрирования:")
+    print(integral[1])
+    return integral[0]
 
 
 def fractional_fft_polar(r, phi, z, n, m, sigma):
@@ -123,20 +126,51 @@ def ker_cartesian(ksi, eta, x, y, p, sigma, m):
 
 
 def function_integral_cartesian(x, y, p, sigma, m):
-    return integrate.dblquad(ker_cartesian, 0, 0.0001, lambda eta: 0, lambda eta: 0.0001, args=(x, y, p, sigma, m))[0]
+    integral = integrate.nquad(ker_cartesian, [[0, 0.0001], [0, 0.0001]], args=(x, y, p, sigma, m))
+    print("погрешность интегрирования:")
+    print(integral[1])
+    return integral[0]
 
 
 def fractional_fft_cartesian(x, y, z, sigma, m):
     k, alpha = constants()
     p = alpha * z
 
-    term1 = -1j * k * alpha / (2 * np.pi * np.sin(alpha * z))
+    term1 = -1j * k * alpha / (2 * np.pi * np.sin(p))
     term2 = np.exp(1j * k * z)
-    term3 = np.exp(1j * k * alpha * (x ** 2 + y ** 2) / (2 * np.tan(alpha * z)))
+    term3 = np.exp(1j * k * alpha * (x ** 2 + y ** 2) / (2 * np.tan(p)))
 
     integral_vec = np.vectorize(function_integral_cartesian)
 
     return term1 * term2 * term3 * integral_vec(x, y, p, sigma, m)
+
+
+def ker_fresnel_polar(rho, z, r):
+    k, alpha = constants()
+    a = 0.0018
+    beta = k * a
+    term0 = np.sin((beta * (rho - 2 * 10 ** (-3))) ** (4 / 3))
+    # term0 = np.sin((beta * rho) ** (5 / 2))
+    term2 = np.exp(1j * k * rho ** 2 / (2 * z))
+    term3 = np.exp(- 1j * k * r * rho / z)
+    term4 = np.sqrt(rho)
+    return term0 * term2 * term3 * term4
+
+
+def function_integral_fresnel_polar(z, r):
+    integral = integrate.quadrature(ker_fresnel_polar, 2 * 10 ** (-3), 1000000000000, args=(z, r))
+    print("погрешность интегрирования:")
+    print(integral[1])
+    return integral[0]
+
+
+def fresnel_transform(z, r):
+    k, alpha = constants()
+    term1 = -1j * np.exp(1j * np.pi / 4)
+    term2 = np.sqrt(k / (2 * np.pi * z * r))
+    term3 = np.exp(1j * k * r ** 2 / (2 * z))
+    integral_vec = np.vectorize(function_integral_fresnel_polar)
+    return term1 * term2 * term3 * integral_vec(z, r)
 
 
 def build_surf(X, Y, Z):
