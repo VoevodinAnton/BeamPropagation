@@ -58,7 +58,7 @@ def plot_radial_function(F):
 
 
 def constants():
-    lambda_ = 633 * 10 ** (-9)
+    lambda_ = 532 * 10 ** (-9)
     k = 2 * np.pi / lambda_
     alpha = 0.0628 / lambda_
     return k, alpha
@@ -147,20 +147,21 @@ def fractional_fft_cartesian(x, y, z, sigma, m):
 
 def ker_fresnel_polar(rho, z, r):
     k, alpha = constants()
-    a = 0.0018
-    beta = k * a
-    term0 = np.sin((beta * (rho - 2 * 10 ** (-3))) ** (4 / 3))
+    a = 0.000142
+    q = 3
+    term0 = np.sin((a * k * rho) ** q)
     # term0 = np.sin((beta * rho) ** (5 / 2))
-    term2 = np.exp(1j * k * rho ** 2 / (2 * z))
-    term3 = np.exp(- 1j * k * r * rho / z)
+    # term0 = np.exp(-1j * (k * a * rho) ** q)
+    term2 = np.exp(1j * k * (rho ** 2) / (2 * z))
+    term3 = np.exp(- 1j * k * (r * rho) / z)
     term4 = np.sqrt(rho)
     return term0 * term2 * term3 * term4
 
 
 def function_integral_fresnel_polar(z, r):
-    integral = integrate.quadrature(ker_fresnel_polar, 2 * 10 ** (-3), 1000000000000, args=(z, r))
-    print("погрешность интегрирования:")
-    print(integral[1])
+    integral = integrate.quad(ker_fresnel_polar, 0, np.inf, args=(z, r))
+    # print("погрешность интегрирования:")
+    # print(integral[1])
     return integral[0]
 
 
@@ -168,7 +169,7 @@ def fresnel_transform(z, r):
     k, alpha = constants()
     term1 = -1j * np.exp(1j * np.pi / 4)
     term2 = np.sqrt(k / (2 * np.pi * z * r))
-    term3 = np.exp(1j * k * r ** 2 / (2 * z))
+    term3 = np.exp(1j * k * (r ** 2) / (2 * z))
     integral_vec = np.vectorize(function_integral_fresnel_polar)
     return term1 * term2 * term3 * integral_vec(z, r)
 
@@ -193,5 +194,5 @@ def build_contourf(X, Y, Z):
     plt.contourf(X, Y, np.abs(Z))
     plt.colorbar()
     plt.subplot(1, 2, 2)
-    plt.contourf(X, Y, np.angle(Z))
+    plt.contourf(X, Y, np.angle(Z), cmap='gist_gray')
     plt.show()
