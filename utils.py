@@ -80,7 +80,7 @@ def fractional_fft_polar_radial(f, r, m):
     return term2 * radial_function(term1 * term3 * term4 * integral, m)
 
 
-def ker_polar(rho, sigma, r, n, m, p):
+def integral_polar(rho, sigma, r, n, m, p):
     k, alpha = constants()
     a = 0.0018
     beta = k * a
@@ -92,7 +92,7 @@ def ker_polar(rho, sigma, r, n, m, p):
 
 
 def function_integral_polar(sigma, r, n, m, p):
-    integral = integrate.quad(ker_polar, 0, 0.0001, args=(sigma, r, n, m, p))
+    integral = integrate.quad(integral_polar, 0, 0.0001, args=(sigma, r, n, m, p))
     print("погрешность интегрирования:")
     print(integral[1])
     return integral[0]
@@ -145,7 +145,7 @@ def fractional_fft_cartesian(x, y, z, sigma, m):
     return term1 * term2 * term3 * integral_vec(x, y, p, sigma, m)
 
 
-def ker_fresnel_polar(rho, z, r):
+def integral_fresnel_polar(rho, z, r):
     k, alpha = constants()
     a = 0.000142
     q = 3
@@ -159,10 +159,14 @@ def ker_fresnel_polar(rho, z, r):
 
 
 def function_integral_fresnel_polar(z, r):
-    integral = integrate.quad(ker_fresnel_polar, 0, np.inf, args=(z, r))
+    integral = integrate.quad(integral_fresnel_polar, 0, np.inf, args=(z, r))
     # print("погрешность интегрирования:")
     # print(integral[1])
-    return integral[0]
+    k, alpha = constants()
+    term1 = -1j * np.exp(1j * np.pi / 4)
+    term2 = np.sqrt(k / (2 * np.pi * z * r))
+    term3 = np.exp(1j * k * (r ** 2) / (2 * z))
+    return term1*term2 * term3 *integral[0]
 
 
 def fresnel_transform(z, r):
@@ -196,3 +200,13 @@ def build_contourf(X, Y, Z):
     plt.subplot(1, 2, 2)
     plt.contourf(X, Y, np.angle(Z), cmap='gist_gray')
     plt.show()
+
+
+def transverse_propagation_fresnel(r, z):
+    m = np.zeros((len(r), 1))
+    integral_vec = np.vectorize(function_integral_fresnel_polar)
+    for zi in z:
+        v = integral_vec(zi, r).reshape(-1, 1)
+        m = np.c_[m, v]
+    m2 = [row[1:] for row in m]
+    return m2

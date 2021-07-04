@@ -4,9 +4,9 @@ import utils
 from scipy import special, integrate
 import sympy as sp
 
-
 if __name__ == '__main__':
-    # parameters
+    # # parameters
+    k, alpha = utils.constants()
     Rbeam = 1.75 * 10 ** (-3)
     q = 3
     print("q: " + str(q))
@@ -15,7 +15,7 @@ if __name__ == '__main__':
 
     lambda_ = 2 * np.pi / k
     print("длина волны: " + str(lambda_))
-    z = 600 * (10 ** (-3))
+    z = 500 * (10 ** (-3))
     print("z: " + '{:06.2f}'.format(z * 10 ** 3) + " mm")
     n1 = 0
     m1 = 2
@@ -34,21 +34,23 @@ if __name__ == '__main__':
     zmax = 2 ** ((q - 2) / q) * Rbeam / (q * a * (k * a * Rbeam) ** (q - 1))
     print("фокус: " + '{:06.2f}'.format(zmax * 10 ** 3) + " mm")
 
-    r = np.linspace(10 ** (-5), Rbeam, 500)
-    p = np.linspace(0, 2 * np.pi, 10)
+    r = np.linspace(10 ** (-5), Rbeam, 50)
+    p = np.linspace(0, 2 * np.pi, 50)
     R, P = np.meshgrid(r, p)
 
     # mode1 = utils.fractional_fft_polar(R, P, z, n1, m1, sigma1)
     # mode2 = utils.fractional_fft_polar(R, P, z, n2, m2, sigma2)
     # mode3 = utils.fractional_fft_polar(R, P, z, n3, m3, sigma3)
 
-    fresnel = utils.fresnel_transform(z, R)
-
-    Z = fresnel
-
     X, Y = utils.pol2cart(R, P)
 
-    utils.build_contourf(X, Y, Z)
+    # Initial field
+    E0 = np.sin((a * k * R) ** q)
+    utils.build_contourf(X, Y, E0)
+
+    E = utils.fresnel_transform(z, R)
+
+    utils.build_contourf(X, Y, E)
 
     # x = np.linspace(-10*lambda_, 10 * lambda_, 150)
     # y = np.linspace(-10*lambda_, 10 * lambda_, 150)
