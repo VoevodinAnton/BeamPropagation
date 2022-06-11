@@ -31,4 +31,4 @@ class Functions:
                     F[n_][m_] = 0
                     continue
                 F[n_][m_] = f[int(index[n_][m_])]
-        return F
+        return F*phi
