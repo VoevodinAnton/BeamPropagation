@@ -46,7 +46,7 @@ def radial_function(f, m):
                 F[n_][m_] = 0
                 continue
             F[n_][m_] = f[int(index[n_][m_])]
-    return F * phi
+    return F
 
 
 def plot_radial_function(F):
@@ -162,11 +162,7 @@ def function_integral_fresnel_polar(z, r):
     integral = integrate.quad(integral_fresnel_polar, 0, np.inf, args=(z, r))
     # print("погрешность интегрирования:")
     # print(integral[1])
-    k, alpha = constants()
-    term1 = -1j * np.exp(1j * np.pi / 4)
-    term2 = np.sqrt(k / (2 * np.pi * z * r))
-    term3 = np.exp(1j * k * (r ** 2) / (2 * z))
-    return term1*term2 * term3 *integral[0]
+    return integral[0]
 
 
 def fresnel_transform(z, r):

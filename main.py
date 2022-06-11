@@ -1,21 +1,20 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import utils
+import functions.functions as functions
 from scipy import special, integrate
 import sympy as sp
 
 if __name__ == '__main__':
     # # parameters
-    k, alpha = utils.constants()
+    k, alpha = functions.constants()
     Rbeam = 1.75 * 10 ** (-3)
     q = 3
     print("q: " + str(q))
     a = 0.000142
-    k, alpha = utils.constants()
 
     lambda_ = 2 * np.pi / k
     print("длина волны: " + str(lambda_))
-    z = 500 * (10 ** (-3))
+    z = 200 * (10 ** (-3))
     print("z: " + '{:06.2f}'.format(z * 10 ** 3) + " mm")
     n1 = 0
     m1 = 2
@@ -34,23 +33,27 @@ if __name__ == '__main__':
     zmax = 2 ** ((q - 2) / q) * Rbeam / (q * a * (k * a * Rbeam) ** (q - 1))
     print("фокус: " + '{:06.2f}'.format(zmax * 10 ** 3) + " mm")
 
-    r = np.linspace(10 ** (-5), Rbeam, 50)
-    p = np.linspace(0, 2 * np.pi, 50)
+    r = np.linspace(10 ** (-5), Rbeam, 100)
+    p = np.linspace(0, 2 * np.pi, 100)
     R, P = np.meshgrid(r, p)
 
     # mode1 = utils.fractional_fft_polar(R, P, z, n1, m1, sigma1)
     # mode2 = utils.fractional_fft_polar(R, P, z, n2, m2, sigma2)
     # mode3 = utils.fractional_fft_polar(R, P, z, n3, m3, sigma3)
 
-    X, Y = utils.pol2cart(R, P)
+    X, Y = functions.pol2cart(R, P)
 
     # Initial field
-    E0 = np.sin((a * k * R) ** q)
-    utils.build_contourf(X, Y, E0)
+    # E0 = np.sin((a * k * r) ** q)
+    # E0 = utils.radial_function(E0, 0)
+    # plt.imshow(np.abs(E0))
+    # plt.show()
 
-    E = utils.fresnel_transform(z, R)
+    k = functions.fresnel_transform(z, r)
+    K = functions.radial_function(k, 0)
 
-    utils.build_contourf(X, Y, E)
+    plt.imshow(np.abs(K))
+    plt.show()
 
     # x = np.linspace(-10*lambda_, 10 * lambda_, 150)
     # y = np.linspace(-10*lambda_, 10 * lambda_, 150)
